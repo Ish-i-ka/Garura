@@ -6,7 +6,7 @@ import AppProviders from './providers/AppProviders';
 
 
 export const metadata: Metadata = {
-  title: 'Secure Interview Platform',
+  title: 'Garura - Secure Interview Platform',
   description: 'Host secure remote interviews.',
 };
 
