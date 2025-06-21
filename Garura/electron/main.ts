@@ -9,7 +9,7 @@ import { execa } from 'execa';
 const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL'];
 
 // --- Configuration ---
-const SERVER_URL = 'http://localhost:3000'; 
+const SERVER_URL = 'https://garura.vercel.app'; 
 const FLAGGED_APPS = [
   'obs64.exe', 'obs32.exe', 'discord.exe', 'anydesk.exe', 'teamviewer.exe', 
   'slack.exe', 'skype.exe', 'zoom.exe', 'mstsc.exe'
@@ -186,7 +186,7 @@ function initializeIpcHandlers() {
   ipcMain.on('socket:connect', (_, roomCode) => {
     if (socket?.connected) return;
     currentRoomCode = roomCode;
-    socket = io(SERVER_URL, { path: '/api/socket' });
+    socket = io(SERVER_URL, { path: '/api/socket', transports:['polling'], });
     socket.on('connect', () => {
       console.log('Socket.IO connected to server.');
       socket?.emit('join-room', roomCode, `interviewee-${socket.id}`);

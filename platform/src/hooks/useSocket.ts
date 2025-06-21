@@ -14,7 +14,7 @@ export const useSocket = (roomCode: string) => {
     if (!user) return;
     const socket = io(process.env.NEXT_PUBLIC_CLIENT_URL!, {
       path: '/api/socket',
-      addTrailingSlash: false,
+      transports: ['polling'],
     });
     socketRef.current = socket;
 
