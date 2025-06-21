@@ -1,63 +1,69 @@
-// src/components/interview_ui/IntervieweeChat.tsx
-'use client';
+"use client"
 
-import { useState, useRef, useEffect } from 'react'; // <-- All hooks are now used.
-import { Send } from 'lucide-react';
+import type React from "react"
 
-// Define the shape of a message for clarity.
-type Message = {
-  text: string;
-  timestamp: number;
-};
+import { useState, useRef, useEffect } from "react"
+import { Send } from "lucide-react"
 
-export default function IntervieweeChat({ onSendMessage }: { onSendMessage: (text: string) => void }) {
-  const [text, setText] = useState('');
-  // We will keep a local log of messages the interviewee has sent.
-  const [sentMessages, setSentMessages] = useState<Message[]>([]);
-  
-  // This ref will point to the scrolling container div.
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+export type Message = {
+  sender: "interviewer" | "interviewee" | "System"
+  text: string
+  timestamp: number
+}
 
-  // This effect will run every time the `sentMessages` array changes.
+export default function IntervieweeChat({
+  messages,
+  onSendMessage,
+}: {
+  messages: Message[]
+  onSendMessage: (text: string) => void
+}) {
+  const [text, setText] = useState("")
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+
   useEffect(() => {
-    // It smoothly scrolls the container to the bottom to show the latest message.
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [sentMessages]);
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [messages])
 
   const handleSend = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     if (text.trim()) {
-      const newMessage = { text: text.trim(), timestamp: Date.now() };
-      
-      // Call the function passed down from the parent to send the message via socket.
-      onSendMessage(newMessage.text);
-      
-      // Add the message to our local log to display it in the UI.
-      setSentMessages(prevMessages => [...prevMessages, newMessage]);
-      
-      setText('');
+      onSendMessage(text.trim())
+      setText("")
     }
-  };
+  }
 
   return (
     <div className="h-full flex flex-col bg-slate-800/50 rounded-lg border border-slate-700 overflow-hidden">
       {/* The main scrolling message area */}
       <div className="flex-1 p-4 space-y-3 overflow-y-auto">
-        {sentMessages.length === 0 ? (
+        {messages.length === 0 ? (
           <div className="h-full flex items-center justify-center text-slate-500 text-sm">
-            Your sent messages will appear here.
+            Messages from the interviewer will appear here.
           </div>
         ) : (
-          sentMessages.map((msg) => (
-            // All messages from the interviewee are right-aligned.
-            <div key={msg.timestamp} className="flex justify-end">
-              <div className="max-w-[80%] bg-blue-600 text-white rounded-lg px-3 py-2">
+          messages.map((msg) => (
+            <div
+              key={msg.timestamp}
+              className={`flex w-full ${msg.sender === "interviewee" ? "justify-end" : "justify-start"}`}
+            >
+              <div
+                className={`max-w-[85%] rounded-lg px-3 py-2 text-white break-words ${
+                  msg.sender === "interviewee"
+                    ? "bg-blue-600"
+                    : msg.sender === "System"
+                      ? "bg-yellow-800/60"
+                      : "bg-slate-700"
+                }`}
+              >
+                {msg.sender !== "interviewee" && (
+                  <p className="text-xs font-bold text-slate-400 capitalize mb-1">{msg.sender}</p>
+                )}
                 <p className="text-sm">{msg.text}</p>
               </div>
             </div>
           ))
         )}
-        {/* This empty div is the target for our auto-scroll */}
         <div ref={messagesEndRef} />
       </div>
 
@@ -68,12 +74,15 @@ export default function IntervieweeChat({ onSendMessage }: { onSendMessage: (tex
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Type a message..."
-          className="flex-grow p-2 bg-slate-700 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          className="flex-grow p-2 bg-slate-700 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none text-white placeholder-slate-400"
         />
-        <button type="submit" className="w-10 h-10 flex items-center justify-center bg-blue-600 hover:bg-blue-700 rounded font-semibold shrink-0">
+        <button
+          type="submit"
+          className="w-10 h-10 flex items-center justify-center bg-blue-600 hover:bg-blue-700 rounded font-semibold shrink-0 text-white"
+        >
           <Send size={18} />
         </button>
       </form>
     </div>
-  );
+  )
 }

@@ -48,6 +48,12 @@ const checkDisplayAffinity = () => {
     }
   });
 };
+function forceQuit() {
+  electron.BrowserWindow.getAllWindows().forEach((window) => {
+    window.destroy();
+  });
+  electron.app.quit();
+}
 const startProcessLogging = (roomCode) => {
   const log = async () => {
     try {
@@ -68,7 +74,7 @@ function startSecurityMonitoring(window, roomCode) {
       type: "Screenshot Attempt",
       message: "Candidate tried to take a screenshot; app terminated."
     });
-    setTimeout(() => electron.app.quit(), 500);
+    setTimeout(() => forceQuit(), 500);
   });
   const clipboardInterval = setInterval(() => electron.clipboard.clear(), 5e3);
   const handleBlur = () => {
@@ -93,7 +99,7 @@ function startSecurityMonitoring(window, roomCode) {
           type: "Suspicious Activity",
           message: "Candidate pressed the Ctrl key 3 times; app terminated."
         });
-        setTimeout(() => electron.app.quit(), 500);
+        setTimeout(() => forceQuit(), 500);
       }
     }
   };
@@ -159,7 +165,13 @@ function initializeIpcHandlers() {
         securityCleanup = startSecurityMonitoring(win, roomCode);
       }
     });
-    socket.on("interview-ended", () => win?.webContents.send("event:interview-ended"));
+    socket.on("interview-ended", () => {
+      win?.webContents.send("event:interview-ended");
+      setTimeout(() => forceQuit(), 500);
+    });
+    socket.on("receive-chat-message", (message) => {
+      win?.webContents.send("event:receive-chat", message);
+    });
     socket.on("receive-coding-question", (md) => win?.webContents.send("event:new-question", md));
     socket.on("quiz-started", (data) => win?.webContents.send("event:quiz-started", data));
   });

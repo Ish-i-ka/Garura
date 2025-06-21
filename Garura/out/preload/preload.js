@@ -31,5 +31,9 @@ electron.contextBridge.exposeInMainWorld("electronAPI", {
   onQuizStarted: (callback) => {
     electron.ipcRenderer.on("event:quiz-started", (_event, quizData) => callback(quizData));
     return () => electron.ipcRenderer.removeAllListeners("event:quiz-started");
+  },
+  onReceiveChatMessage: (callback) => {
+    electron.ipcRenderer.on("event:receive-chat", (_event, message) => callback(message));
+    return () => electron.ipcRenderer.removeAllListeners("event:receive-chat");
   }
 });

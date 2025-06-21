@@ -38,4 +38,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('event:quiz-started', (_event, quizData) => callback(quizData));
     return () => ipcRenderer.removeAllListeners('event:quiz-started');
   },
+  onReceiveChatMessage: (callback: (message: { sender: string; text: string }) => void) => {
+    ipcRenderer.on('event:receive-chat', (_event, message) => callback(message));
+    return () => ipcRenderer.removeAllListeners('event:receive-chat');
+  },
 });

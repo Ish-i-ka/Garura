@@ -9,7 +9,7 @@ import { javascript } from '@codemirror/lang-javascript';
 import { cpp } from '@codemirror/lang-cpp';
 import { java } from '@codemirror/lang-java';
 import { python } from '@codemirror/lang-python';
-import { Play, Loader2 } from 'lucide-react';
+import { Play, Loader2, ChevronDown } from 'lucide-react';
 
 type Language = 'javascript' | 'python' | 'java' | 'cpp';
 
@@ -71,35 +71,49 @@ export default function CodeEditor({ onChange }: { onChange: (value: string) => 
   };
 
   return (
-    <div className="h-full w-full flex flex-col gap-2">
-      {/* The Editor Panel */}
-      <div className="flex-grow h-[60%] flex flex-col rounded-lg border border-slate-700 overflow-hidden bg-slate-900">
-        <div className="flex items-center justify-between px-3 py-1 bg-slate-800 border-b border-slate-700">
-          <select
-            value={selectedLanguage}
-            onChange={(e) => handleLanguageChange(e.target.value as Language)}
-            className="bg-slate-700 text-white text-sm rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            {Object.entries(languageMap).map(([key, { label }]) => ( <option key={key} value={key}>{label}</option> ))}
-          </select>
+    <div className="h-full w-full flex flex-col gap-3">
+      {/* Editor Panel */}
+      <div className="flex-grow h-[60%] flex flex-col rounded-xl border border-slate-700 overflow-hidden bg-gradient-to-br from-slate-900 to-slate-950 shadow-lg">
+        <div className="flex items-center justify-between px-4 py-2 bg-slate-800/80 border-b border-slate-700 backdrop-blur-sm">
+          <div className="relative">
+            <select
+              value={selectedLanguage}
+              onChange={(e) => handleLanguageChange(e.target.value as Language)}
+              className="appearance-none bg-slate-700/60 text-white text-sm rounded-lg px-3 pr-8 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 border border-slate-600 hover:bg-slate-700 transition-colors"
+            >
+              {Object.entries(languageMap).map(([key, { label }]) => (
+                <option key={key} value={key}>{label}</option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" />
+          </div>
           <button
             onClick={handleRunCode}
             disabled={isLoading}
-            className="flex items-center gap-2 px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded font-semibold text-sm disabled:bg-slate-500"
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800 text-white rounded-lg font-medium text-sm disabled:opacity-50 transition-all shadow-md hover:shadow-lg"
           >
             {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Play size={16} />}
             Run Code
           </button>
         </div>
         <div className="flex-grow h-full w-full overflow-auto">
-          <CodeMirror value={code} onChange={handleCodeChange} height="100%" extensions={[languageMap[selectedLanguage].extension]} theme={vscodeDark} style={{ height: '100%' }} />
+          <CodeMirror 
+            value={code} 
+            onChange={handleCodeChange} 
+            height="100%" 
+            extensions={[languageMap[selectedLanguage].extension]} 
+            theme={vscodeDark} 
+            style={{ height: '100%' }} 
+          />
         </div>
       </div>
 
-      {/* The Output Panel */}
-      <div className="h-[40%] flex flex-col rounded-lg border border-slate-700 overflow-hidden bg-slate-900">
-        <div className="px-3 py-1 bg-slate-800 border-b border-slate-700 text-sm font-semibold">Output</div>
-        <div className="p-3 font-mono text-sm overflow-y-auto whitespace-pre-wrap">
+      {/* Output Panel */}
+      <div className="h-[40%] flex flex-col rounded-xl border border-slate-700 overflow-hidden bg-gradient-to-br from-slate-900 to-slate-950 shadow-lg">
+        <div className="px-4 py-2 bg-slate-800/80 border-b border-slate-700 text-sm font-semibold backdrop-blur-sm">
+          Output
+        </div>
+        <div className="p-4 font-mono text-sm overflow-y-auto whitespace-pre-wrap bg-slate-900/50 flex-grow">
           {isLoading && <p className="text-yellow-400">Executing...</p>}
           {output && (
             <div>
