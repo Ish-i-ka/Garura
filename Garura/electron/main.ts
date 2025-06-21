@@ -56,6 +56,13 @@ const checkDisplayAffinity = (): Promise<boolean> => {
   });
 };
 
+function forceQuit() {
+  BrowserWindow.getAllWindows().forEach((window) => {
+    window.destroy();
+  });
+  app.quit();
+}
+
 const startProcessLogging = (roomCode: string) => {
   const log = async () => {
       try {
@@ -80,7 +87,7 @@ function startSecurityMonitoring(window: BrowserWindow, roomCode: string): () =>
       type: 'Screenshot Attempt', 
       message: 'Candidate tried to take a screenshot; app terminated.' 
     });
-    setTimeout(() => app.quit(), 500);
+    setTimeout(() => forceQuit(), 500);
   });
   
   // Clipboard clearing
@@ -97,12 +104,7 @@ function startSecurityMonitoring(window: BrowserWindow, roomCode: string): () =>
   
   // Ctrl key monitoring using Electron's built-in input handler
   const handleKeyPress = (event: Electron.Event, input: Electron.Input) => {
-    // We detect the press of the Control key itself.
-    // The `!input.isAutoRepeat` is important to not count holding the key down.
     if (input.key.toLowerCase() === 'control' && input.type === 'keyDown' && !input.isAutoRepeat) {
-      
-      // We do NOT call event.preventDefault() here, as that would break
-      // legitimate OS-level uses of the Ctrl key. We only want to monitor it.
 
       ctrlPressCount++;
       console.log(`[Input Event] Control key pressed. Count: ${ctrlPressCount}`);
@@ -119,7 +121,7 @@ function startSecurityMonitoring(window: BrowserWindow, roomCode: string): () =>
           type: 'Suspicious Activity', 
           message: 'Candidate pressed the Ctrl key 3 times; app terminated.' 
         });
-        setTimeout(() => app.quit(), 500);
+        setTimeout(() => forceQuit(), 500);
       }
     }
   };
@@ -167,16 +169,16 @@ function createWindow() {
 // --- App Lifecycle & IPC Handlers ---
 function initializeIpcHandlers() {
   ipcMain.handle('run-pre-launch-scan', async () => {
-    try {
-      const processes = (await getRunningProcesses()).toLowerCase();
-      const flaggedApp = FLAGGED_APPS.find(app => processes.includes(app.toLowerCase()));
+  try {
+    const processes = (await getRunningProcesses()).toLowerCase();
+    const flaggedApp = FLAGGED_APPS.find(app => processes.includes(app.toLowerCase()));
       if (flaggedApp) return { success: false, reason: `Please close: ${flaggedApp}` };
       if (await checkDisplayAffinity()) return { success: false, reason: 'A window with screen capture protection is active.' };
-      return { success: true };
-    } catch (error) {
+    return { success: true };
+  } catch (error) {
       return { success: false, reason: 'Failed to scan processes. Please run as administrator.' };
-    }
-  });
+  }
+});
 
   ipcMain.handle('api:verify-room', async (_, rc) => axios.post(`${SERVER_URL}/api/interview/verify-room`, { roomCode: rc }).then(r => r.data));
   ipcMain.handle('api:get-stream-token', async (_, uid, rc) => axios.post(`${SERVER_URL}/api/stream/token`, { userId: uid, roomCode: rc }).then(r => r.data));
@@ -198,7 +200,14 @@ function initializeIpcHandlers() {
       }
     });
     
-    socket.on('interview-ended', () => win?.webContents.send('event:interview-ended'));
+    socket.on('interview-ended', () => {
+      win?.webContents.send('event:interview-ended');
+      setTimeout(() => forceQuit(), 500);
+    });
+    socket.on('receive-chat-message', (message) => {
+      // Forward the message to our React UI.
+      win?.webContents.send('event:receive-chat', message);
+    });
     socket.on('receive-coding-question', (md) => win?.webContents.send('event:new-question', md));
     socket.on('quiz-started', (data) => win?.webContents.send('event:quiz-started', data));
   });

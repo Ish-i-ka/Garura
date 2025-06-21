@@ -22,6 +22,7 @@ import CodeEditor from "../interview_ui/CodeEditor";
 import QuizInterface from "../interview_ui/QuizInterface";
 import Whiteboard from "../interview_ui/Whiteboard";
 import IntervieweeChat from "../interview_ui/IntervieweeChat";
+import type { Message } from "../interview_ui/IntervieweeChat";
 
 // A small, dedicated helper component to manage the call state.
 // This enforces the "microphone always on" rule robustly.
@@ -60,6 +61,8 @@ export default function InterviewRoomScreen() {
   const [quizData, setQuizData] = useState<any | null>(null); // 'any' is acceptable here as quiz shape is dynamic
   const [currentCode, setCurrentCode] = useState<string>(''); // Holds the live code from the editor
   const [ctrlWarning, setCtrlWarning] = useState<string | null>(null);
+
+  const [chatLog, setChatLog] = useState<Message[]>([]);
 
   // This single, consolidated useEffect handles the entire setup and event listening.
   useEffect(() => {
@@ -122,18 +125,31 @@ export default function InterviewRoomScreen() {
       setCtrlWarning(`Warning: System key pressed (${count}/3). Please avoid OS shortcuts.`);
     });
 
+    // This new listener handles incoming chat messages
+    const cleanupChat = (window.electronAPI as any).onReceiveChatMessage((message: Omit<Message, 'timestamp'>) => {
+      setChatLog(prev => [...prev, { ...message, timestamp: Date.now() }]);
+    });
+
     return () => {
       videoClient?.disconnectUser();
       cleanupEnd();
       cleanupQuestion();
       cleanupQuiz();
       cleanupCtrl();
+      cleanupChat();
     };
   }, [roomCode]); // This effect runs only once when the roomCode is available.
 
   // --- Action Handlers ---
   const handleSendMessage = (text: string) => {
-    if (roomCode) window.electronAPI.sendChatMessage({ roomCode, text });
+    if (roomCode) {
+      // Add our own message to the log immediately for a snappy UX
+      const ourMessage: Message = { sender: 'interviewee', text, timestamp: Date.now() };
+      setChatLog(prev => [...prev, ourMessage]);
+      
+      // Then, send it to the main process to be broadcast to the server
+      window.electronAPI.sendChatMessage({ roomCode, text });
+    }
   };
   const handleCodeSubmit = () => {
     if (roomCode) {
@@ -192,7 +208,7 @@ export default function InterviewRoomScreen() {
                 </div>
             </div>
             <div className="h-[25%] min-h-[160px]">
-                 <IntervieweeChat onSendMessage={handleSendMessage}/>
+                 <IntervieweeChat messages={chatLog} onSendMessage={handleSendMessage}/>
             </div>
           </div>
           
