@@ -5,21 +5,30 @@ import { useMutation } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { PhoneOff, Loader2 } from "lucide-react"
 
+
 // Updated to match your actual API endpoint
 const endInterview = async (roomCode: string) => {
+  // Directly get token from localStorage
+  const authRaw = localStorage.getItem('auth-storage')
+  let token: string | null = null
+  if (authRaw) {
+    try {
+      const auth = JSON.parse(authRaw)
+      token = auth.state?.token || auth.token || null
+    } catch {}
+  }
   const response = await fetch(`/api/interview/end`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
     body: JSON.stringify({ roomCode }),
   })
-
   if (!response.ok) {
-    const errorData = await response.json()
+    const errorData = await response.json().catch(() => ({ message: 'An unknown error occurred' }))
     throw new Error(errorData.message || "Failed to end interview")
   }
-
   return response.json()
 }
 

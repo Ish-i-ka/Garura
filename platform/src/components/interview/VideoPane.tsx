@@ -17,6 +17,7 @@ interface VideoPaneProps {
 export default function VideoPane({ roomCode, endInterviewSession }: VideoPaneProps) {
   const user = useAuthStore((state) => state.user)
   const [isSetupComplete, setIsSetupComplete] = useState(false)
+  const [isReady, setIsReady] = useState(false)
 
   const clientRef = useRef<StreamVideoClient | null>(null)
   const callRef = useRef<Call | null>(null)
@@ -46,10 +47,12 @@ export default function VideoPane({ roomCode, endInterviewSession }: VideoPanePr
 
     clientRef.current = client
     callRef.current = call
+    // Force re-render after refs are set
+    setIsReady(true)
   }, [userId, token, roomCode])
 
   // Show loading while preparing
-  if (isTokenLoading || !clientRef.current || !callRef.current) {
+  if (isTokenLoading || !clientRef.current || !callRef.current || !isReady) {
     return (
       <div className="h-full w-full flex items-center justify-center bg-slate-50 dark:bg-slate-900">
         <div className="flex flex-col items-center gap-4 text-slate-600 dark:text-slate-400">
