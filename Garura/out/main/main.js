@@ -167,7 +167,7 @@ function initializeIpcHandlers() {
     });
     socket.on("interview-ended", () => {
       win?.webContents.send("event:interview-ended");
-      setTimeout(() => forceQuit(), 3e3);
+      setTimeout(() => forceQuit(), 500);
     });
     socket.on("receive-chat-message", (message) => {
       win?.webContents.send("event:receive-chat", message);

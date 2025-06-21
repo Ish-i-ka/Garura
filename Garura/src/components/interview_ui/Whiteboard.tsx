@@ -1,24 +1,31 @@
 // src/components/interview_ui/Whiteboard.tsx
 'use client';
-
-// We import the Tldraw component directly from the library
 import { Tldraw } from 'tldraw';
-
-// We also need to import its CSS file for it to look correct.
-// In a Vite project, we can import CSS directly into a component.
 import 'tldraw/tldraw.css';
+import { useRef, useEffect } from 'react';
 
 export default function Whiteboard() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    const handleResize = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        containerRef.current.style.height = `${rect.height}px`;
+      }
+    };
+    
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
-    // The component needs to be in a positioned container to take up full space.
-    <div className="relative h-full w-full rounded-lg overflow-hidden border border-slate-700">
-      <Tldraw>
-        {/* 
-          tldraw provides its own complete UI (tools, canvas, etc.).
-          We can customize it, but the default is perfect for our needs.
-          We don't need to add any children here.
-        */}
-      </Tldraw>
+    <div 
+      ref={containerRef}
+      className="relative h-full w-full rounded-xl overflow-hidden border border-slate-700 shadow-lg"
+    >
+      <Tldraw />
     </div>
   );
 }
