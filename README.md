@@ -168,9 +168,9 @@ Directory structure:
     │   │   └── renderer/
     │   │       ├── index.html
     │   │       └── assets/
-    │   │           ├── index-128hJQKo.css
-    │   │           ├── index-BE_j8zJx.js
-    │   │           └── latency-chart-Bj5OSYzg.es-CFw5dkYU.js
+    │   │           ├── index-D9y6fB0U.js
+    │   │           ├── index-V4QVwOP9.css
+    │   │           └── latency-chart-Bj5OSYzg.es-Bf1pZQQI.js
     │   ├── scripts/
     │   │   └── check_affinity.ps1
     │   └── src/
