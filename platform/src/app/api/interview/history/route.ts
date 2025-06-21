@@ -3,6 +3,18 @@ import { getUserFromRequest } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
 
+// Helper to map database status to the frontend's expected status strings
+const mapStatus = (status: 'PENDING' | 'ACTIVE' | 'ENDED'): 'upcoming' | 'ongoing' | 'expired' => {
+  switch (status) {
+    case 'PENDING':
+      return 'upcoming';
+    case 'ACTIVE':
+      return 'ongoing';
+    case 'ENDED':
+      return 'expired';
+  }
+};
+
 export async function GET(request: NextRequest) {
   try {
     const user = await getUserFromRequest(request);
@@ -10,18 +22,25 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    // Fetch all sessions for this interviewer, ordering by most recent first
+    // --- FIX: Fetch ALL sessions for the user, not just 'ENDED' ones. ---
     const sessions = await prisma.interviewSession.findMany({
       where: {
         interviewerId: user.userId,
-        status: 'ENDED', // We only want to show completed interviews
       },
       orderBy: {
-        endedAt: 'desc',
+        createdAt: 'desc',
       },
     });
 
-    return NextResponse.json(sessions);
+    // --- FIX: Map the data to the format the frontend expects. ---
+    const formattedMeetings = sessions.map(session => ({
+      id: session.roomCode,
+      name: 'Room', // As per schema, a placeholder name is used
+      status: mapStatus(session.status),
+      createdAt: session.createdAt.toISOString(),
+    }));
+
+    return NextResponse.json(formattedMeetings);
 
   } catch (error) {
     console.error('Fetch History Error:', error);
