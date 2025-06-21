@@ -1,5 +1,5 @@
 "use client"
-
+//main landing page
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -90,9 +90,9 @@ export default function GaruraLanding() {
     },
     {
       tagline: "AI.NEURAL.NETWORK.ACTIVE",
-      title: "SMART INTERVIEW ASSISTANT",
+      title: "SMART INTERVIEWER ASSISTANT",
       description:
-        "Google Gemini AI analyzes candidate responses in real-time, suggesting follow-up questions and providing performance insights.",
+        "Google Gemini AI helps in curating personalized questions on diverse topics and analyzes candidate responses in real-time, and provides performance scores.",
       mockup: (
         <div className="relative group">
           <div className="bg-gradient-to-br from-gray-950 to-black border border-cyan-400/30 hover:border-cyan-400/60 rounded-xl overflow-hidden backdrop-blur-sm transition-all duration-500 hover:shadow-[0_0_30px_rgba(6,182,212,0.2)]">
@@ -247,7 +247,7 @@ export default function GaruraLanding() {
       ),
     },
     {
-      title: "AI.ANALYSIS",
+      title: "AI.HELPER",
       content: (
         <div className="bg-gradient-to-br from-gray-950 to-black border border-cyan-400/30 p-6 rounded-xl">
           <div className="flex items-center mb-4">
@@ -259,16 +259,16 @@ export default function GaruraLanding() {
 
           <div className="space-y-3 text-xs font-mono">
             <div className="border border-cyan-400/30 bg-gradient-to-r from-cyan-400/5 to-blue-600/5 p-2 rounded-lg">
-              <div className="text-cyan-400">ANALYSIS.POSITIVE</div>
-              <div className="text-white">Strong problem-solving approach</div>
+              <div className="text-cyan-400">QUESTIONING.POSITIVE</div>
+              <div className="text-white">Strong personalised questioning approach</div>
             </div>
             <div className="border border-yellow-400/30 bg-gradient-to-r from-yellow-400/5 to-orange-400/5 p-2 rounded-lg">
-              <div className="text-yellow-400">SUGGESTION.QUEUE</div>
-              <div className="text-white">Consider asking about edge cases</div>
+              <div className="text-yellow-400">ANSWER.QUEUE</div>
+              <div className="text-white">Get instant score of your answers</div>
             </div>
             <div className="border border-cyan-400/30 bg-gradient-to-r from-cyan-400/5 to-blue-600/5 p-2 rounded-lg">
               <div className="text-cyan-400">RECOMMENDATION</div>
-              <div className="text-white">Suggest: "What's the time complexity?"</div>
+              <div className="text-white">Suggest realtime quiz based on diverse topics</div>
             </div>
           </div>
         </div>
@@ -300,7 +300,7 @@ export default function GaruraLanding() {
     },
     {
       icon: "⬡",
-      title: "AI-POWERED INSIGHTS",
+      title: "AI-POWERED QUESTION CURATION",
       description: "Smart question suggestions and performance analysis powered by AI.",
       demo: "AI.ANALYZING.RESPONSES",
       size: "large",
@@ -807,9 +807,9 @@ export default function GaruraLanding() {
                   "No, candidates must use our secure desktop application. This is essential for our OS-level security features to work properly, including process monitoring and advanced anti-cheating controls that cannot be implemented in a web browser.",
               },
               {
-                question: "How does the AI assistance work?",
+                question: "How does the AI helper work?",
                 answer:
-                  "Our AI integration analyzes interviews in real-time and provides smart question suggestions based on candidate responses, coding patterns, and performance. It also offers post-interview analysis guidelines to help make fair assessments.",
+                  "Our AI helper helps in curating personalized questions on diverse topics and analyzes candidate responses in real-time, and provides performance scores.",
               },
               {
                 question: "What happens if suspicious activity is detected?",
