@@ -154,6 +154,12 @@ function initializeIpcHandlers() {
   electron.ipcMain.handle("api:get-stream-token", async (_, uid, rc) => axios.post(`${SERVER_URL}/api/stream/token`, { userId: uid, roomCode: rc }).then((r) => r.data));
   electron.ipcMain.handle("api:submit-quiz", async (_, payload) => axios.post(`${SERVER_URL}/api/quiz/submit`, payload).then((res) => res.data));
   electron.ipcMain.handle("api:run-code", async (_, payload) => axios.post(`${SERVER_URL}/api/code/run`, payload).then((res) => res.data));
+  electron.ipcMain.handle("request-screen-share", async () => {
+    if (!win) {
+      throw new Error("Main window not available");
+    }
+    return electron.desktopCapturer.getSources({ types: ["screen", "window"] });
+  });
   electron.ipcMain.on("socket:connect", (_, roomCode) => {
     if (socket?.connected) return;
     socket = socket_ioClient.io(SERVER_URL, { path: "/api/socket", transports: ["polling"] });

@@ -9,6 +9,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // --- API Calls (Proxied through the main process for security) ---
   verifyRoomCode: (roomCode: string) => ipcRenderer.invoke('api:verify-room', roomCode),
   getStreamToken: (userId: string, roomCode: string) => ipcRenderer.invoke('api:get-stream-token', userId, roomCode),
+  requestScreenShare: (): Promise<Electron.DesktopCapturerSource[]> => 
+    ipcRenderer.invoke('request-screen-share'),
   sendProcessLog: (logData: { roomCode: string; processList: string }) => ipcRenderer.invoke('api:send-log', logData),
   submitQuiz: (payload: { answers: any[]; questions: any[] }) => ipcRenderer.invoke('api:submit-quiz', payload),
 

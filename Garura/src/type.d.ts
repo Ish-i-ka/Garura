@@ -21,6 +21,7 @@ export interface IElectronAPI {
   onReceiveChatMessage: (callback: (message: { sender: string; text: string }) => void) => () => void;
   onNewCodingQuestion: (callback: (markdown: string) => void) => () => void;
   onQuizStarted: (callback: (quizData: any) => void) => () => void;
+  requestScreenShare?: () => Promise<MediaStream>
 }
 
 declare global {

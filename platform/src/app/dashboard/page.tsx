@@ -18,6 +18,7 @@ interface Meeting {
   name: string;
   status: 'upcoming' | 'ongoing' | 'expired';
   createdAt: string;
+  reportFilePath?: string; // ADDED: Assuming reportFilePath is now part of the Meeting type
 }
 
 class FetchError extends Error {
@@ -78,15 +79,18 @@ export default function DashboardPage() {
   const [copiedMeetingId, setCopiedMeetingId] = useState<string | null>(null);
 
   // --- Handler for downloading a report ---
-  const handleDownloadReport = async (meetingId: string) => {
-    if (!token || downloadingReportId) return;
+  const handleDownloadReport = async (meetingId: string, reportFilePath?: string) => {
+    if (!token || downloadingReportId || !reportFilePath) return; // Added check for reportFilePath
     setDownloadingReportId(meetingId);
     try {
-      const filename = `report-${meetingId}.txt`;
-      const res = await axios.get(`/api/reports/${filename}`, {
+      // Directly use the reportFilePath if it exists
+      const res = await axios.get(reportFilePath, {  // Use the provided reportFilePath
         headers: { Authorization: `Bearer ${token}` },
         responseType: 'blob', // Necessary for file downloads
       });
+
+      // Extract filename from the URL
+      const filename = reportFilePath.substring(reportFilePath.lastIndexOf('/') + 1);
 
       // Create a temporary URL and trigger the browser download
       const url = window.URL.createObjectURL(new Blob([res.data]));
@@ -95,13 +99,13 @@ export default function DashboardPage() {
       link.setAttribute('download', filename);
       document.body.appendChild(link);
       link.click();
-      
+
       // Clean up the temporary URL
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (err: any) {
       console.error("Failed to download report:", err);
-      alert(err?.response?.data?.message || 'Failed to download report. It may not exist yet.');
+      alert(err?.response?.data?.message || 'Failed to download report. It may not exist yet or the link might be invalid.'); // Improved error message
     } finally {
       setDownloadingReportId(null);
     }
@@ -281,14 +285,14 @@ export default function DashboardPage() {
                           size="sm"
                           variant="outline"
                           className="w-full bg-gray-700/50 border-gray-600/50 text-gray-300 hover:bg-gray-600/50 rounded-lg"
-                          onClick={() => handleDownloadReport(room.id)}
-                          disabled={downloadingReportId === room.id}
+                          onClick={() => handleDownloadReport(room.id, room.reportFilePath)} // Pass reportFilePath
+                          disabled={downloadingReportId === room.id || !room.reportFilePath} // Disable if no reportFilePath
                         >
                           {downloadingReportId === room.id ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
                           ) : (
                             <>
-                              <Download className="h-3 w-3 mr-1" /> Download Report
+                              <Download className="h-3 w-3 mr-1" /> {room.reportFilePath ? 'Download Report' : 'No Report'}
                             </>
                           )}
                         </Button>
@@ -387,14 +391,14 @@ export default function DashboardPage() {
                   size="sm"
                   variant="outline"
                   className="w-full bg-gray-700/50 border-gray-600/50 text-gray-300 hover:bg-gray-600/50 rounded-lg"
-                  onClick={() => handleDownloadReport(room.id)}
-                  disabled={downloadingReportId === room.id}
+                   onClick={() => handleDownloadReport(room.id, room.reportFilePath)} // Pass reportFilePath
+                  disabled={downloadingReportId === room.id || !room.reportFilePath} // Disable if no reportFilePath
                 >
                   {downloadingReportId === room.id ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
                     <>
-                      <Download className="h-3 w-3 mr-1" /> Download Report
+                      <Download className="h-3 w-3 mr-1" />  {room.reportFilePath ? 'Download Report' : 'No Report'}
                     </>
                   )}
                 </Button>
@@ -469,14 +473,14 @@ export default function DashboardPage() {
                     size="sm"
                     variant="outline"
                     className="w-full bg-gray-700/50 border-gray-600/50 text-gray-300 hover:bg-gray-600/50 rounded-lg"
-                    onClick={() => handleDownloadReport(record.id)}
-                    disabled={downloadingReportId === record.id}
+                    onClick={() => handleDownloadReport(record.id, record.reportFilePath)} // Pass reportFilePath
+                    disabled={downloadingReportId === record.id || !record.reportFilePath} // Disable if no reportFilePath
                   >
                     {downloadingReportId === record.id ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                       <>
-                        <Download className="h-3 w-3 mr-1" /> Download Report
+                        <Download className="h-3 w-3 mr-1" /> {record.reportFilePath ? 'Download Report' : 'No Report'}
                       </>
                     )}
                   </Button>

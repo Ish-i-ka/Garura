@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, screen, globalShortcut, clipboard } from 'electron';
+import { app, BrowserWindow, ipcMain, screen, globalShortcut, clipboard, desktopCapturer  } from 'electron';
 import path from 'node:path';
 import os from 'node:os';
 import { exec } from 'node:child_process';
@@ -184,6 +184,12 @@ function initializeIpcHandlers() {
   ipcMain.handle('api:get-stream-token', async (_, uid, rc) => axios.post(`${SERVER_URL}/api/stream/token`, { userId: uid, roomCode: rc }).then(r => r.data));
   ipcMain.handle('api:submit-quiz', async (_, payload) => axios.post(`${SERVER_URL}/api/quiz/submit`, payload).then(res => res.data));
   ipcMain.handle('api:run-code', async (_, payload) => axios.post(`${SERVER_URL}/api/code/run`, payload).then(res => res.data));
+  ipcMain.handle('request-screen-share', async () => {
+    if (!win) {
+      throw new Error("Main window not available");
+    }
+    return desktopCapturer.getSources({ types: ['screen', 'window'] });
+  });
 
   ipcMain.on('socket:connect', (_, roomCode) => {
     if (socket?.connected) return;
