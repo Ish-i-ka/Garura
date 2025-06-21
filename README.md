@@ -84,6 +84,7 @@ Garura's Electron app implements military-grade protections:
 | **Focus Loss Detection**      | Sends alert when app loses focus (Alt+Tab)                                  | ✅     |
 | **Periodic Process Logging**  | Captures running processes every 10 minutes for final report                | ✅     |
 | **Clipboard Wiping**          | Periodically clears system clipboard                                        | ✅     |
+| **Windows Blur Handler**      | Monitors the window focus and warns if 'blur' triggers                      | ✅     |
 
 ## Tech Stack  
 **End-to-End Modern Architecture**  
