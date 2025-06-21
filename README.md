@@ -45,7 +45,7 @@ Garura enforces integrity through an **asymmetric architecture**:
 
 This architecture enables system-level security impossible in browser-based solutions, creating a trusted assessment environment.  
 
-![Garura Banner](https://via.placeholder.com/800x400?text=Garura+Workflow+Diagram)  
+![Garura Banner](https://github.com/SatoruZati/Garura/blob/4a9eebdc07c58dd1008863a1e58a6184d39381fe/Banner.png)  
 
 ## Core Features  
 
