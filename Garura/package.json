@@ -1,0 +1,95 @@
+{
+  "name": "garura",
+  "private": true,
+  "version": "0.0.0",
+  "main": "out/main/main.js",
+  "description": "Secure Interview Client Application",
+  "author": "Bibek Dhara <your.email@example.com>",
+  "license": "SEE LICENSE IN LICENSE",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "set ELECTRON_BUILDER_ALLOW_UNRESOLVED_DEPENDENCIES=true && set CSC_IDENTITY_AUTO_DISCOVERY=false && electron-vite build && electron-builder --win nsis --config.win.signAndEditExecutable=false",
+    "build:mac": "electron-vite build && electron-builder --mac",
+    "build:linux": "electron-vite build && electron-builder --linux",
+    "build:ui": "vite build",
+    "build:electron": "electron-vite build",
+    "build:pack": "electron-builder",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@codemirror/lang-cpp": "^6.0.2",
+    "@codemirror/lang-java": "^6.0.1",
+    "@codemirror/lang-javascript": "^6.2.4",
+    "@codemirror/lang-python": "^6.2.1",
+    "@stream-io/video-react-sdk": "^1.18.5",
+    "@tailwindcss/vite": "^4.1.10",
+    "@uiw/codemirror-theme-vscode": "^4.23.13",
+    "@uiw/react-codemirror": "^4.23.13",
+    "axios": "^1.10.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "execa": "^9.6.0",
+    "lucide-react": "^0.515.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
+    "socket.io-client": "^4.8.1",
+    "sonner": "^2.0.5",
+    "tailwind-merge": "^3.3.1",
+    "tldraw": "^3.13.1",
+    "zustand": "^5.0.5"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.25.0",
+    "@tailwindcss/typography": "^0.5.16",
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "@vitejs/plugin-react": "^4.4.1",
+    "autoprefixer": "^10.4.21",
+    "electron": "^36.4.0",
+    "electron-builder": "^26.0.12",
+    "electron-vite": "^3.1.0",
+    "eslint": "^9.25.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.19",
+    "globals": "^16.0.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.10",
+    "tw-animate-css": "^1.3.4",
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.30.1",
+    "vite": "^6.3.5",
+    "vite-plugin-electron": "^0.29.0"
+  },
+  "build": {
+    "appId": "com.secure-interview.client",
+    "productName": "Garura - Interview Client",
+    "asar": true,
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "out/**/*",
+      "scripts/**/*"
+    ],
+    "extraResources": [
+    {
+      "from": "scripts",
+      "to": "scripts"
+    }
+    ],
+    "win": {
+      "target": "nsis",
+      "requestedExecutionLevel": "requireAdministrator",
+      "signAndEditExecutable": false,
+      "signExts": null
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
+  }
+}

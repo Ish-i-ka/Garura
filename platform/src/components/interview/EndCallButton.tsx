@@ -100,5 +100,5 @@ export default function EndCallButton({ roomCode, endInterviewSession }: EndCall
         <PhoneOff className="w-5 h-5 text-white" />
       )}
     </button>
-  )
+  ) 
 }
