@@ -9,7 +9,7 @@ import { execa } from 'execa';
 const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL'];
 
 // --- Configuration ---
-const SERVER_URL = 'https://garura.vercel.app'; 
+const SERVER_URL = 'https://garuraweb.onrender.com'; 
 const FLAGGED_APPS = [
   'obs64.exe', 'obs32.exe', 'discord.exe', 'anydesk.exe', 'teamviewer.exe', 
   'slack.exe', 'skype.exe', 'zoom.exe', 'mstsc.exe'

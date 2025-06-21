@@ -7,7 +7,7 @@ const axios = require("axios");
 const socket_ioClient = require("socket.io-client");
 const execa = require("execa");
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
-const SERVER_URL = "http://localhost:3000";
+const SERVER_URL = "https://garuraweb.onrender.com";
 const FLAGGED_APPS = [
   "obs64.exe",
   "obs32.exe",
@@ -78,15 +78,17 @@ function startSecurityMonitoring(window, roomCode) {
     });
   };
   window.on("blur", handleBlur);
-  const handleKeyPress = (_, input) => {
-    if (input.key === "Control" && !input.isAutoRepeat) {
+  const handleKeyPress = (event, input) => {
+    if (input.key.toLowerCase() === "control" && input.type === "keyDown" && !input.isAutoRepeat) {
       ctrlPressCount++;
+      console.log(`[Input Event] Control key pressed. Count: ${ctrlPressCount}`);
       window.webContents.send("event:ctrl-key-warning", ctrlPressCount);
       socket?.emit("security-alert", roomCode, {
         type: "Ctrl Key Pressed",
         message: `Candidate pressed the Ctrl key. (Count: ${ctrlPressCount})`
       });
       if (ctrlPressCount >= 3) {
+        console.log("Ctrl key limit reached! Terminating.");
         socket?.emit("security-alert", roomCode, {
           type: "Suspicious Activity",
           message: "Candidate pressed the Ctrl key 3 times; app terminated."
@@ -100,8 +102,10 @@ function startSecurityMonitoring(window, roomCode) {
     console.log("Cleaning up security monitoring...");
     electron.globalShortcut.unregister("PrintScreen");
     clearInterval(clipboardInterval);
-    window.off("blur", handleBlur);
-    window.webContents.off("before-input-event", handleKeyPress);
+    if (!window.isDestroyed()) {
+      window.off("blur", handleBlur);
+      window.webContents.off("before-input-event", handleKeyPress);
+    }
   };
 }
 function createWindow() {
@@ -146,7 +150,7 @@ function initializeIpcHandlers() {
   electron.ipcMain.handle("api:run-code", async (_, payload) => axios.post(`${SERVER_URL}/api/code/run`, payload).then((res) => res.data));
   electron.ipcMain.on("socket:connect", (_, roomCode) => {
     if (socket?.connected) return;
-    socket = socket_ioClient.io(SERVER_URL, { path: "/api/socket" });
+    socket = socket_ioClient.io(SERVER_URL, { path: "/api/socket", transports: ["polling"] });
     socket.on("connect", () => {
       console.log("Socket.IO connected to server.");
       socket?.emit("join-room", roomCode, `interviewee-${socket.id}`);
