@@ -1,10 +1,4 @@
-Of course. My apologies for the naming inconsistency and the use of emojis. You are right to want a clean, professional, and accurate README for your project.
 
-Here is the complete, corrected, and professional README file in Markdown, incorporating the exact name "Garura" and the deployment link you provided.
-
----
-
-```markdown
 # Garura: The Secure Remote Interview Platform
 
 <!-- TODO: Replace with a project banner image -->
