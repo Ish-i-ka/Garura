@@ -1,6 +1,5 @@
 // NEXT.JS SERVER: src/app/api/quiz/submit/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { getIO } from '@/lib/socket-helper'; // We will create this helper
 
 export async function POST(request: NextRequest) {
   try {

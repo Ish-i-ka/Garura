@@ -22,17 +22,19 @@ async function fetchWithAuth(url: string, options: RequestInit = {}) {
   return response.json();
 }
 
+type StringRecord = Record<string, unknown>;
+
 // Auth APIs
-export const registerUser = (data: any) => fetchWithAuth('/api/auth/register', { method: 'POST', body: JSON.stringify(data) });
+export const registerUser = (data: StringRecord) => fetchWithAuth('/api/auth/register', { method: 'POST', body: JSON.stringify(data) });
 export const loginUser = (data: Record<string, unknown>) => fetchWithAuth('/api/auth/login', { method: 'POST', body: JSON.stringify(data) });
 
 // Interview APIs
-export const createInterview = (data: any) => fetchWithAuth('/api/interview/create', { method: 'POST', body: JSON.stringify(data) });
+export const createInterview = (data: StringRecord) => fetchWithAuth('/api/interview/create', { method: 'POST', body: JSON.stringify(data) });
 export const endInterview = (roomCode: string) => fetchWithAuth('/api/interview/end', { method: 'POST', body: JSON.stringify({ roomCode }) });
 export const getStreamToken = (userId: string, roomCode: string) => fetchWithAuth('/api/stream/token', { method: 'POST', body: JSON.stringify({ userId, roomCode }) });
 
 // Quiz API 
-export const generateQuizQuestions = (data: any) => fetchWithAuth('/api/quiz/generate', { method: 'POST', body: JSON.stringify(data) });
+export const generateQuizQuestions = (data: StringRecord) => fetchWithAuth('/api/quiz/generate', { method: 'POST', body: JSON.stringify(data) });
 export const verifyRoom = (roomCode: string) => fetchWithAuth('/api/interview/verify-room', { method: 'POST', body: JSON.stringify({ roomCode }) });
 
 export const getInterviewHistory = () => fetchWithAuth('/api/interview/history', { method: 'GET' });

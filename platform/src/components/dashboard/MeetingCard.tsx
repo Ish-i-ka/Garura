@@ -17,10 +17,7 @@ export default function MeetingCard({ title, date, reportUrl }: MeetingCardProps
   // State to hold the client-side formatted date to prevent hydration errors.
   const [formattedDate, setFormattedDate] = useState<string | null>(null);
 
-  // --- THIS IS THE FIX FOR THE REPORT URL ---
-  // We construct the correct, callable API endpoint from the file path stored in the database.
-  // This is a derived constant, so it doesn't need to be in state.
-  const apiReportUrl = reportUrl ? reportUrl.replace('/reports/', '/api/reports/') : null;
+  
 
   useEffect(() => {
     // This effect runs only on the client, so it can safely use browser-specific APIs.
