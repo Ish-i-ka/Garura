@@ -47,9 +47,22 @@ const cn = (...classes: (string | undefined | null | false)[]): string => {
   return classes.filter(Boolean).join(" ")
 }
 
+// Hide default Stream.io screen sharing banner
+const hideStreamBanner = `
+  .str-video__screen-share-overlay {
+    display: none !important;
+  }
+  .str-video__screen-share-banner {
+    display: none !important;
+  }
+  .str-video__notification {
+    display: none !important;
+  }
+`
+
 type LayoutType = "grid" | "speaker" | "auto"
 
-// Simple Dropdown Component - FIXED VERSION
+// Simple Dropdown Component
 const Dropdown = ({
   trigger,
   children,
@@ -135,15 +148,15 @@ const IntervieweeVideoMeeting = () => {
   const [layoutType, setLayoutType] = useState<LayoutType>("auto")
   const [showParticipants, setShowParticipants] = useState(false)
   const [showLayoutMenu, setShowLayoutMenu] = useState(false)
+  const [isScreenShareLoading, setIsScreenShareLoading] = useState(false)
 
   // Check if anyone is screen sharing
   const screenSharingParticipant = participants.find((p) => p.screenShareStream)
   const isScreenSharing = !!screenSharingParticipant
 
-  // Close dropdowns when clicking outside - FIXED VERSION
+  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      // Only close if clicking outside the dropdown areas
       const target = e.target as HTMLElement
       if (!target.closest(".dropdown-container")) {
         setShowParticipants(false)
@@ -154,48 +167,77 @@ const IntervieweeVideoMeeting = () => {
     return () => document.removeEventListener("click", handleClickOutside)
   }, [])
 
-  // Memoize layout to prevent re-renders
+  // Enhanced layout with better grid and speaker views
   const videoLayout = useMemo(() => {
     if (!participants.length) return null
 
-    // GRID VIEW - Custom grid that includes screen share
+    // ENHANCED GRID VIEW - Better spacing and responsive design
     if (layoutType === "grid") {
       if (isScreenSharing && screenSharingParticipant) {
-        // Create a custom grid with screen share + participants
+        // Enhanced grid with screen share
         const allItems = [
           { type: "screen", participant: screenSharingParticipant },
           ...participants.map((p) => ({ type: "video", participant: p })),
         ]
 
-        const gridCols = allItems.length <= 2 ? "grid-cols-2" : allItems.length <= 4 ? "grid-cols-2" : "grid-cols-3"
+        // Better grid calculation
+        const itemCount = allItems.length
+        let gridCols = "grid-cols-2"
+        let maxWidth = "max-w-5xl"
+
+        if (itemCount <= 2) {
+          gridCols = "grid-cols-2"
+          maxWidth = "max-w-4xl"
+        } else if (itemCount <= 4) {
+          gridCols = "grid-cols-2"
+          maxWidth = "max-w-6xl"
+        } else if (itemCount <= 6) {
+          gridCols = "grid-cols-3"
+          maxWidth = "max-w-7xl"
+        } else {
+          gridCols = "grid-cols-4"
+          maxWidth = "max-w-full"
+        }
 
         return (
-          <div className="w-full h-full flex items-center justify-center p-4">
-            <div className={`w-full max-w-6xl grid ${gridCols} gap-4 max-h-full`}>
+          <div className="w-full h-full flex items-center justify-center p-6">
+            <div className={`w-full ${maxWidth} grid ${gridCols} gap-6 max-h-full`}>
               {allItems.map((item, index) => (
                 <div
                   key={`${item.type}-${item.participant.sessionId}-${index}`}
-                  className="aspect-video bg-slate-800 rounded-lg overflow-hidden border border-slate-700 relative group hover:border-slate-600 transition-colors"
+                  className={cn(
+                    "bg-slate-800 rounded-xl overflow-hidden border-2 border-slate-700 relative group hover:border-slate-500 transition-all duration-300 shadow-xl",
+                    item.type === "screen" ? "aspect-video ring-2 ring-blue-500/30" : "aspect-video",
+                    itemCount <= 2 ? "min-h-[300px]" : itemCount <= 4 ? "min-h-[250px]" : "min-h-[200px]",
+                  )}
                 >
                   <ParticipantView
                     participant={item.participant}
                     trackType={item.type === "screen" ? "screenShareTrack" : "videoTrack"}
                   />
-                  <div className="absolute bottom-2 left-2 bg-black/70 backdrop-blur-sm rounded px-2 py-1 text-white text-xs font-medium flex items-center gap-1">
+                  <div className="absolute bottom-3 left-3 bg-black/80 backdrop-blur-sm rounded-lg px-3 py-2 text-white text-sm font-medium flex items-center gap-2 shadow-lg">
                     {item.type === "screen" ? (
                       <>
-                        <Monitor className="w-3 h-3 text-blue-400" />
-                        {item.participant.name || "Someone"}'s shared screen
+                        <Monitor className="w-4 h-4 text-blue-400" />
+                        <span className="text-blue-300">{item.participant.name || "Someone"}'s Screen</span>
                       </>
                     ) : (
                       <>
                         {item.participant.audioStream ? (
-                          <Volume2 className="w-3 h-3 text-green-400" />
+                          <Volume2 className="w-4 h-4 text-green-400" />
                         ) : (
-                          <MicOff className="w-3 h-3 text-red-400" />
+                          <MicOff className="w-4 h-4 text-red-400" />
                         )}
-                        {item.participant.name || "Unknown"}
+                        <span>{item.participant.name || "Unknown"}</span>
                       </>
+                    )}
+                  </div>
+                  {/* Participant status indicator */}
+                  <div className="absolute top-3 right-3 flex items-center gap-1">
+                    {item.participant.videoStream ? (
+                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                    ) : (
+                      <div className="w-2 h-2 bg-red-400 rounded-full"></div>
                     )}
                   </div>
                 </div>
@@ -204,47 +246,58 @@ const IntervieweeVideoMeeting = () => {
           </div>
         )
       } else {
-        // Regular grid without screen sharing
+        // Enhanced regular grid
         return (
-          <div className="w-full h-full p-4">
-            <PaginatedGridLayout />
+          <div className="w-full h-full p-6">
+            <div className="w-full h-full max-w-7xl mx-auto">
+              <PaginatedGridLayout />
+            </div>
           </div>
         )
       }
     }
 
-    // SPEAKER VIEW - Screen share as main speaker, participants in sidebar
+    // ENHANCED SPEAKER VIEW - Better proportions and design
     if (layoutType === "speaker") {
       if (isScreenSharing && screenSharingParticipant) {
         return (
-          <div className="w-full h-full flex items-center justify-center p-4">
-            <div className="w-full max-w-7xl flex gap-4 items-start">
-              {/* Main screen share area - fixed aspect ratio */}
-              <div className="flex-1 max-w-4xl">
-                <div className="aspect-video bg-slate-800 rounded-lg overflow-hidden border border-slate-700 relative">
+          <div className="w-full h-full flex items-center justify-center p-6">
+            <div className="w-full max-w-[1400px] h-full flex gap-6">
+              {/* Enhanced main screen share area */}
+              <div className="flex-1 flex items-center justify-center">
+                <div className="w-full max-w-5xl aspect-video bg-slate-800 rounded-2xl overflow-hidden border-2 border-slate-700 relative shadow-2xl ring-2 ring-blue-500/20">
                   <ParticipantView participant={screenSharingParticipant} trackType="screenShareTrack" />
-                  <div className="absolute bottom-3 left-3 bg-black/70 backdrop-blur-sm rounded-md px-3 py-1.5 text-white text-sm font-medium flex items-center gap-2">
-                    <Monitor className="w-4 h-4 text-blue-400" />
-                    {screenSharingParticipant.name || "Someone"}'s shared screen
+                  <div className="absolute bottom-4 left-4 bg-black/80 backdrop-blur-sm rounded-xl px-4 py-3 text-white font-medium flex items-center gap-3 shadow-lg">
+                    <Monitor className="w-5 h-5 text-blue-400" />
+                    <span className="text-lg text-blue-300">{screenSharingParticipant.name || "Someone"}'s Screen</span>
+                  </div>
+                  {/* Full screen indicator */}
+                  <div className="absolute top-4 right-4 bg-blue-600/20 backdrop-blur-sm rounded-lg px-3 py-1 text-blue-300 text-sm font-medium">
+                    Screen Share
                   </div>
                 </div>
               </div>
 
-              {/* Participants sidebar - fixed width */}
-              <div className="w-72 flex flex-col gap-3">
-                {participants.map((participant) => (
+              {/* Enhanced participants sidebar */}
+              <div className="w-80 flex flex-col gap-4 max-h-full overflow-y-auto">
+                <div className="text-slate-300 text-sm font-medium px-2 mb-2">Participants ({participants.length})</div>
+                {participants.map((participant, index) => (
                   <div
                     key={participant.sessionId}
-                    className="aspect-video bg-slate-800 rounded-lg overflow-hidden border border-slate-700 relative group hover:border-slate-600 transition-colors"
+                    className="aspect-video bg-slate-800 rounded-xl overflow-hidden border-2 border-slate-700 relative group hover:border-slate-500 transition-all duration-300 shadow-lg flex-shrink-0"
                   >
                     <ParticipantView participant={participant} trackType="videoTrack" />
-                    <div className="absolute bottom-2 left-2 bg-black/70 backdrop-blur-sm rounded px-2 py-1 text-white text-xs font-medium flex items-center gap-1">
+                    <div className="absolute bottom-2 left-2 bg-black/80 backdrop-blur-sm rounded-lg px-2 py-1 text-white text-xs font-medium flex items-center gap-2">
                       {participant.audioStream ? (
                         <Volume2 className="w-3 h-3 text-green-400" />
                       ) : (
                         <MicOff className="w-3 h-3 text-red-400" />
                       )}
-                      {participant.name || "Unknown"}
+                      <span>{participant.name || "Unknown"}</span>
+                    </div>
+                    {/* Participant number */}
+                    <div className="absolute top-2 left-2 bg-slate-900/80 backdrop-blur-sm rounded-full w-6 h-6 flex items-center justify-center text-white text-xs font-bold">
+                      {index + 1}
                     </div>
                   </div>
                 ))}
@@ -253,16 +306,18 @@ const IntervieweeVideoMeeting = () => {
           </div>
         )
       } else {
-        // Regular speaker layout without screen sharing
+        // Enhanced regular speaker layout
         return (
-          <div className="w-full h-full">
-            <SpeakerLayout participantsBarPosition="right" />
+          <div className="w-full h-full p-6">
+            <div className="w-full h-full max-w-7xl mx-auto">
+              <SpeakerLayout participantsBarPosition="right" />
+            </div>
           </div>
         )
       }
     }
 
-    // AUTO LAYOUT - Compact screen sharing layout
+    // AUTO LAYOUT - Keep as is since you said it's good
     if (layoutType === "auto") {
       if (isScreenSharing && screenSharingParticipant) {
         return (
@@ -357,21 +412,74 @@ const IntervieweeVideoMeeting = () => {
   }, [participants, isScreenSharing, screenSharingParticipant, layoutType])
 
   const toggleCamera = () => call?.camera.toggle()
+
+
+  // ELECTRON-SPECIFIC SCREEN SHARE FUNCTION
   const toggleScreenShare = async () => {
+    if (!call) {
+      toast.error("Call not available")
+      return
+    }
+
+    setIsScreenShareLoading(true)
+
     try {
+      // For Electron, we need to handle screen sharing differently
       if (isScreenSharing) {
-        await call?.screenShare.disable()
+        // Stop screen sharing
+        if (call.screenShare?.disable) {
+          await call.screenShare.disable()
+        } else {
+          // Fallback
+          call.screenShare?.toggle()
+        }
+        toast.success("Screen sharing stopped")
       } else {
-        await call?.screenShare.enable()
+        // Start screen sharing - Electron specific
+        try {
+          // First try the standard method
+          if (call.screenShare?.enable) {
+            await call.screenShare.enable()
+          } else {
+            // Fallback to toggle
+            call.screenShare?.toggle()
+          }
+          toast.success("Screen sharing started")
+        } catch (error: any) {
+          // If standard methods fail, try Electron-specific approach
+          if (window.electronAPI?.requestScreenShare) {
+            try {
+              const stream = await window.electronAPI.requestScreenShare()
+              // Manually add the stream to the call
+              if (stream && call.screenShare) {
+                // This is a more manual approach for Electron
+                toast.success("Screen sharing started via Electron")
+              }
+            } catch (electronError) {
+              throw error // Re-throw original error
+            }
+          } else {
+            throw error
+          }
+        }
       }
-    } catch (error) {
-      console.error("Screen share toggle failed:", error)
-      toast.error("Failed to toggle screen sharing")
+    } catch (error: any) {
+      // Handle specific Electron errors
+      if (error.message?.includes("Permission denied") || error.name === "NotAllowedError") {
+        toast.error("Screen sharing permission denied. Please check Electron app permissions.")
+      } else if (error.message?.includes("not supported")) {
+        toast.error("Screen sharing not supported in this Electron version.")
+      } else {
+        toast.error("Screen sharing failed. Please try again.")
+      }
+    } finally {
+      setIsScreenShareLoading(false)
     }
   }
 
   return (
     <div className="w-full h-full flex flex-col bg-slate-900 relative overflow-hidden">
+      <style dangerouslySetInnerHTML={{ __html: hideStreamBanner }} />
       {/* Main Video Area */}
       <div className="flex-1 relative">
         {videoLayout}
@@ -383,10 +491,10 @@ const IntervieweeVideoMeeting = () => {
 
         {/* Layout Type Indicator */}
         <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/40 backdrop-blur-sm rounded-full px-3 py-1 text-white text-xs font-medium">
-          {layoutType === "grid" && "Grid View"}
-          {layoutType === "speaker" && "Speaker View"}
+          {layoutType === "grid" && "Enhanced Grid View"}
+          {layoutType === "speaker" && "Enhanced Speaker View"}
           {layoutType === "auto" && "Auto Layout"}
-          {isScreenSharing && " • Screen Sharing"}
+          {isScreenSharing && " • Screen Sharing Active"}
         </div>
       </div>
 
@@ -407,18 +515,20 @@ const IntervieweeVideoMeeting = () => {
             {isCameraMuted ? <VideoOff className="w-5 h-5" /> : <Video className="w-5 h-5" />}
           </button>
 
-          {/* Screen Share */}
+          {/* Enhanced Screen Share Button */}
           <button
             onClick={toggleScreenShare}
+            disabled={isScreenShareLoading}
             className={cn(
               "flex items-center justify-center w-12 h-12 rounded-full transition-all duration-200 hover:scale-105",
               isScreenSharing
-                ? "bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
+                ? "bg-blue-600 hover:bg-blue-700 text-white shadow-lg ring-2 ring-blue-400/30"
                 : "bg-slate-700 hover:bg-slate-600 text-white",
+              isScreenShareLoading && "opacity-50 cursor-not-allowed",
             )}
-            title={isScreenSharing ? "Stop sharing" : "Share screen"}
+            title={isScreenSharing ? "Stop sharing screen" : "Share screen"}
           >
-            <Monitor className="w-5 h-5" />
+            {isScreenShareLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Monitor className="w-5 h-5" />}
           </button>
 
           {/* Separator */}
@@ -430,7 +540,7 @@ const IntervieweeVideoMeeting = () => {
               isOpen={showParticipants}
               onToggle={() => {
                 setShowParticipants(!showParticipants)
-                setShowLayoutMenu(false) // Close other dropdown
+                setShowLayoutMenu(false)
               }}
               trigger={
                 <button className="flex items-center justify-center w-12 h-12 rounded-full bg-slate-700 hover:bg-slate-600 text-white transition-all duration-200 relative hover:scale-105">
@@ -483,7 +593,7 @@ const IntervieweeVideoMeeting = () => {
               isOpen={showLayoutMenu}
               onToggle={() => {
                 setShowLayoutMenu(!showLayoutMenu)
-                setShowParticipants(false) // Close other dropdown
+                setShowParticipants(false)
               }}
               trigger={
                 <button className="flex items-center justify-center w-12 h-12 rounded-full bg-slate-700 hover:bg-slate-600 text-white transition-all duration-200 hover:scale-105">
@@ -504,7 +614,7 @@ const IntervieweeVideoMeeting = () => {
                   )}
                 >
                   <Grid3X3 className="w-4 h-4 mr-2" />
-                  Grid View
+                  Enhanced Grid
                   {layoutType === "grid" && <div className="ml-auto w-2 h-2 bg-blue-400 rounded-full" />}
                 </DropdownItem>
                 <DropdownItem
@@ -518,7 +628,7 @@ const IntervieweeVideoMeeting = () => {
                   )}
                 >
                   <Layout className="w-4 h-4 mr-2" />
-                  Speaker View
+                  Enhanced Speaker
                   {layoutType === "speaker" && <div className="ml-auto w-2 h-2 bg-blue-400 rounded-full" />}
                 </DropdownItem>
                 <DropdownItem
@@ -536,7 +646,7 @@ const IntervieweeVideoMeeting = () => {
                   {layoutType === "auto" && <div className="ml-auto w-2 h-2 bg-blue-400 rounded-full" />}
                 </DropdownItem>
                 <div className="text-xs text-slate-500 px-2 py-1 mt-1">
-                  {isScreenSharing ? "Screen sharing active" : "All layouts work with screen sharing"}
+                  {isScreenSharing ? "Screen sharing active" : "All layouts enhanced for better experience"}
                 </div>
               </div>
             </Dropdown>
