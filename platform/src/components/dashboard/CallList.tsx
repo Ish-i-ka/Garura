@@ -12,7 +12,7 @@ interface InterviewSession {
   id: string;
   roomCode: string;
   endedAt: string; 
-  reportFilePath: string | null;
+  reportUrl: string | null; // Changed from reportFilePath to reportUrl
 }
 
 export default function CallList() {
@@ -42,8 +42,8 @@ export default function CallList() {
           <MeetingCard
             key={session.id}
             title={`Interview: ${session.roomCode}`}
-            date={new Date(session.endedAt).toLocaleString()}
-            reportUrl={session.reportFilePath}
+            date={session.endedAt} // Pass raw date string
+            reportUrl={session.reportUrl} // Use reportUrl directly
           />
         ))
       ) : (

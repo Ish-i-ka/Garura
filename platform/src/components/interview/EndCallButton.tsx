@@ -52,11 +52,10 @@ export default function EndCallButton({ roomCode, endInterviewSession }: EndCall
       return endInterview(currentRoomCode)
     },
     onSuccess: (data) => {
-        const reportApiUrl = data.reportUrl.replace('/reports/', '/api/reports/');
         toast.success("Interview ended & report generated.", { 
           action: {
             label: "View Report",
-            onClick: () => window.open(reportApiUrl, '_blank')
+            onClick: () => window.open(data.reportUrl, '_blank')
           }
         });
         router.push('/dashboard');

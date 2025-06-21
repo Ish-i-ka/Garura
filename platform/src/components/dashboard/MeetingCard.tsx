@@ -45,11 +45,11 @@ export default function MeetingCard({ title, date, reportUrl }: MeetingCardProps
       <CardFooter>
         <Button
           // The button now opens the API URL in a new browser tab.
-          onClick={() => window.open(apiReportUrl!, '_blank')}
-          disabled={!apiReportUrl}
+          onClick={() => window.open(reportUrl!, '_blank')}
+          disabled={!reportUrl}
           className="w-full"
         >
-          {apiReportUrl ? 'View Process Report' : 'Report Not Available'}
+          {reportUrl ? 'View Process Report' : 'Report Not Available'}
         </Button>
       </CardFooter>
     </Card>
