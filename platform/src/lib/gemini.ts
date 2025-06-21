@@ -26,14 +26,23 @@ export async function generateQuiz(topic: string, count: number, directions: str
     Generate the quiz now.
     `;
 
+  let text = '';
   try {
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    const text = response.text().trim();
-    const quiz = JSON.parse(text);
+    text = response.text().trim();
+    
+    // FIX: Extract JSON from Gemini's response format
+    let jsonText = text;
+    if (jsonText.startsWith('```json')) {
+      jsonText = jsonText.replace(/```json|```/g, '');
+    }
+    
+    const quiz = JSON.parse(jsonText);
     return quiz;
   } catch (error) {
     console.error('Error generating quiz from Gemini:', error);
+    console.error('Raw response text:', text);
     throw new Error('Failed to generate quiz.');
   }
 }

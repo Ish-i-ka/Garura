@@ -42,19 +42,6 @@ import Whiteboard from "../interview_ui/Whiteboard"
 import IntervieweeChat from "../interview_ui/IntervieweeChat"
 import type { Message } from "../interview_ui/IntervieweeChat"
 
-// Hide default Stream.io screen sharing banner
-const hideStreamBanner = `
-  .str-video__screen-share-overlay {
-    display: none !important;
-  }
-  .str-video__screen-share-banner {
-    display: none !important;
-  }
-  .str-video__notification {
-    display: none !important;
-  }
-`
-
 // Utility function to combine class names
 const cn = (...classes: (string | undefined | null | false)[]): string => {
   return classes.filter(Boolean).join(" ")
@@ -385,7 +372,6 @@ const IntervieweeVideoMeeting = () => {
 
   return (
     <div className="w-full h-full flex flex-col bg-slate-900 relative overflow-hidden">
-      <style dangerouslySetInnerHTML={{ __html: hideStreamBanner }} />
       {/* Main Video Area */}
       <div className="flex-1 relative">
         {videoLayout}
