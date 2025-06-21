@@ -18,8 +18,9 @@ export const initializeSocketIO = (io: Server) => {
       socket.to(roomCode).emit('user-connected', userId);
     });
 
-    socket.on('send-chat-message', (roomCode: string, message: { sender: string; text: string }) => {
-      socket.to(roomCode).emit('receive-chat-message', message);
+    socket.on('send-chat-message', (roomCode: string, message: { sender: string, text: string }) => {
+        // Use `io.to().emit()` to broadcast to everyone in the room, including the sender.
+        io.to(roomCode).emit('receive-chat-message', message);
     });
 
     socket.on('launch-quiz', (roomCode: string, quizData: any) => {
