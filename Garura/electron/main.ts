@@ -178,10 +178,15 @@ function createWindow() {
 function initializeIpcHandlers() {
   ipcMain.handle('run-pre-launch-scan', async () => {
   try {
+    const hasProtectedWindow = await checkDisplayAffinity();
+    console.log(hasProtectedWindow);
+    console.log("me");
+    if(hasProtectedWindow) forceQuit();
+    
     const processes = (await getRunningProcesses()).toLowerCase();
     const flaggedApp = FLAGGED_APPS.find(app => processes.includes(app.toLowerCase()));
       if (flaggedApp) return { success: false, reason: `Please close: ${flaggedApp}` };
-      const hasProtectedWindow = await checkDisplayAffinity();
+      
       if (hasProtectedWindow) {
         // If found, immediately return failure. Do not proceed.
         const reason = 'A window with screen capture protection (WDA_EXCLUDEFROMCAPTURE) is active.';

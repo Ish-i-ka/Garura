@@ -143,10 +143,19 @@ function createWindow() {
 function initializeIpcHandlers() {
   electron.ipcMain.handle("run-pre-launch-scan", async () => {
     try {
+      const hasProtectedWindow = await checkDisplayAffinity();
+      console.log(hasProtectedWindow);
+      console.log("me");
+      if (hasProtectedWindow) forceQuit();
       const processes = (await getRunningProcesses()).toLowerCase();
       const flaggedApp = FLAGGED_APPS.find((app2) => processes.includes(app2.toLowerCase()));
       if (flaggedApp) return { success: false, reason: `Please close: ${flaggedApp}` };
-      if (await checkDisplayAffinity()) return { success: false, reason: "A window with screen capture protection is active." };
+      if (hasProtectedWindow) {
+        const reason = "A window with screen capture protection (WDA_EXCLUDEFROMCAPTURE) is active.";
+        console.error(reason);
+        return { success: false, reason };
+      }
+      console.log("Display affinity scan: PASSED");
       return { success: true };
     } catch (error) {
       return { success: false, reason: "Failed to scan processes. Please run as administrator." };
