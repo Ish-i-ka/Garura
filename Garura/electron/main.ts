@@ -181,8 +181,19 @@ function initializeIpcHandlers() {
     const processes = (await getRunningProcesses()).toLowerCase();
     const flaggedApp = FLAGGED_APPS.find(app => processes.includes(app.toLowerCase()));
       if (flaggedApp) return { success: false, reason: `Please close: ${flaggedApp}` };
-      if (await checkDisplayAffinity()) return { success: false, reason: 'A window with screen capture protection is active.' };
-    return { success: true };
+      const hasProtectedWindow = await checkDisplayAffinity();
+      if (hasProtectedWindow) {
+        // If found, immediately return failure. Do not proceed.
+        const reason = 'A window with screen capture protection (WDA_EXCLUDEFROMCAPTURE) is active.';
+        console.error(reason);
+        // dialog.showErrorBox('Security Violation', reason);
+        // forceQuit(reason);
+        return { success: false, reason: reason };
+      }
+      console.log("Display affinity scan: PASSED");
+      
+      // Only if BOTH checks pass, we return success.
+      return { success: true };
   } catch (error) {
       return { success: false, reason: 'Failed to scan processes. Please run as administrator.' };
   }
