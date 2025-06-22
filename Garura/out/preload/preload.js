@@ -7,6 +7,9 @@ electron.contextBridge.exposeInMainWorld("electronAPI", {
   verifyRoomCode: (roomCode) => electron.ipcRenderer.invoke("api:verify-room", roomCode),
   getStreamToken: (userId, roomCode) => electron.ipcRenderer.invoke("api:get-stream-token", userId, roomCode),
   requestScreenShare: () => electron.ipcRenderer.invoke("request-screen-share"),
+  getScreenStream: async (sourceId) => {
+    return electron.ipcRenderer.invoke("get-screen-stream", sourceId);
+  },
   sendProcessLog: (logData) => electron.ipcRenderer.invoke("api:send-log", logData),
   submitQuiz: (payload) => electron.ipcRenderer.invoke("api:submit-quiz", payload),
   // --- Real-time Socket.IO Management (Commands to the main process) ---

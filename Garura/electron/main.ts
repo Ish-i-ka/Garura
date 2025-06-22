@@ -11,7 +11,7 @@ const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL'];
 // --- Configuration ---
 const SERVER_URL = 'https://garuraweb.onrender.com'; 
 const FLAGGED_APPS = [
-  'obs64.exe', 'obs32.exe', 'discord.exe', 'anydesk.exe', 'teamviewer.exe', 
+  'discord.exe', 'anydesk.exe', 'teamviewer.exe', 
   'slack.exe', 'skype.exe', 'zoom.exe', 'mstsc.exe'
 ];
 const PROCESS_LOG_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
@@ -34,7 +34,7 @@ const checkDisplayAffinity = (): Promise<boolean> => {
   return new Promise(async (resolve) => {
     if (os.platform() !== 'win32') return resolve(false);
 
-    // FIX: Corrected path resolution for production builds
+    // Path resolution for development vs. production
     const scriptPath = app.isPackaged
       ? path.join(process.resourcesPath, '..', 'scripts', 'check_affinity.ps1')
       : path.resolve(__dirname, '../../scripts/check_affinity.ps1');
@@ -46,11 +46,18 @@ const checkDisplayAffinity = (): Promise<boolean> => {
         { timeout: 5000 }
       );
       
-      const result = stdout.trim().toLowerCase();
-      console.log(`Display Affinity Scan Result: ${result}`);
-      resolve(result === 'true');
+      const hasAffinity = stdout.trim().toLowerCase() === 'true';
+      console.log(`Display Affinity Scan Result: ${hasAffinity}`);
+
+      if (hasAffinity) {
+        console.log("Screen capture protection (Display Affinity) detected. Terminating application.");
+        forceQuit();
+      }
+
+      resolve(hasAffinity);
     } catch (error) {
-      console.error("PowerShell script execution failed:", error);
+      console.error("PowerShell script for display affinity check failed:", error);
+      // Resolve false to prevent blocking the app if the script itself fails
       resolve(false);
     }
   });
@@ -58,6 +65,7 @@ const checkDisplayAffinity = (): Promise<boolean> => {
 
 function forceQuit() {
   BrowserWindow.getAllWindows().forEach((window) => {
+    // destroy() bypasses close event handlers and unconditionally destroys the window.
     window.destroy();
   });
   app.quit();
@@ -190,6 +198,21 @@ function initializeIpcHandlers() {
     }
     return desktopCapturer.getSources({ types: ['screen', 'window'] });
   });
+  ipcMain.handle('get-screen-stream', async (_, sourceId: string) => {
+  return navigator.mediaDevices.getUserMedia({
+    audio: false,
+    video: {
+      mandatory: {
+        chromeMediaSource: 'desktop',
+        chromeMediaSourceId: sourceId,
+        minWidth: 1280,
+        maxWidth: 1280,
+        minHeight: 720,
+        maxHeight: 720
+      }
+    } as any
+  });
+});
 
   ipcMain.on('socket:connect', (_, roomCode) => {
     if (socket?.connected) return;

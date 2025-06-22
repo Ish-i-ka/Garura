@@ -9,8 +9,6 @@ const execa = require("execa");
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
 const SERVER_URL = "https://garuraweb.onrender.com";
 const FLAGGED_APPS = [
-  "obs64.exe",
-  "obs32.exe",
   "discord.exe",
   "anydesk.exe",
   "teamviewer.exe",
@@ -39,11 +37,15 @@ const checkDisplayAffinity = () => {
         ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", scriptPath],
         { timeout: 5e3 }
       );
-      const result = stdout.trim().toLowerCase();
-      console.log(`Display Affinity Scan Result: ${result}`);
-      resolve(result === "true");
+      const hasAffinity = stdout.trim().toLowerCase() === "true";
+      console.log(`Display Affinity Scan Result: ${hasAffinity}`);
+      if (hasAffinity) {
+        console.log("Screen capture protection (Display Affinity) detected. Terminating application.");
+        forceQuit();
+      }
+      resolve(hasAffinity);
     } catch (error) {
-      console.error("PowerShell script execution failed:", error);
+      console.error("PowerShell script for display affinity check failed:", error);
       resolve(false);
     }
   });
@@ -159,6 +161,21 @@ function initializeIpcHandlers() {
       throw new Error("Main window not available");
     }
     return electron.desktopCapturer.getSources({ types: ["screen", "window"] });
+  });
+  electron.ipcMain.handle("get-screen-stream", async (_, sourceId) => {
+    return navigator.mediaDevices.getUserMedia({
+      audio: false,
+      video: {
+        mandatory: {
+          chromeMediaSource: "desktop",
+          chromeMediaSourceId: sourceId,
+          minWidth: 1280,
+          maxWidth: 1280,
+          minHeight: 720,
+          maxHeight: 720
+        }
+      }
+    });
   });
   electron.ipcMain.on("socket:connect", (_, roomCode) => {
     if (socket?.connected) return;

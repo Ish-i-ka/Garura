@@ -11,6 +11,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getStreamToken: (userId: string, roomCode: string) => ipcRenderer.invoke('api:get-stream-token', userId, roomCode),
   requestScreenShare: (): Promise<Electron.DesktopCapturerSource[]> => 
     ipcRenderer.invoke('request-screen-share'),
+  getScreenStream: async (sourceId: string): Promise<MediaStream> => {
+    return ipcRenderer.invoke('get-screen-stream', sourceId);
+  },
   sendProcessLog: (logData: { roomCode: string; processList: string }) => ipcRenderer.invoke('api:send-log', logData),
   submitQuiz: (payload: { answers: any[]; questions: any[] }) => ipcRenderer.invoke('api:submit-quiz', payload),
 
