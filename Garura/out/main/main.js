@@ -30,7 +30,7 @@ const getRunningProcesses = () => new Promise((resolve, reject) => {
 const checkDisplayAffinity = () => {
   return new Promise(async (resolve) => {
     if (os.platform() !== "win32") return resolve(false);
-    const scriptPath = electron.app.isPackaged ? path.join(process.resourcesPath, "..", "scripts", "check_affinity.ps1") : path.resolve(__dirname, "../../scripts/check_affinity.ps1");
+    const scriptPath = electron.app.isPackaged ? path.join(process.resourcesPath, "app.asar.unpacked", "scripts", "check_affinity.ps1") : path.resolve(__dirname, "../../scripts/check_affinity.ps1");
     try {
       const { stdout } = await execa.execa(
         "powershell.exe",
@@ -124,6 +124,7 @@ function createWindow() {
     frame: false,
     kiosk: true,
     alwaysOnTop: true,
+    icon: path.join(__dirname, "../../build/icon.ico"),
     webPreferences: {
       preload: path.join(__dirname, "../preload/preload.js")
     }

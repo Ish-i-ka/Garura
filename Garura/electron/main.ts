@@ -36,7 +36,7 @@ const checkDisplayAffinity = (): Promise<boolean> => {
 
     // Path resolution for development vs. production
     const scriptPath = app.isPackaged
-      ? path.join(process.resourcesPath, '..', 'scripts', 'check_affinity.ps1')
+      ? path.join(process.resourcesPath, 'app.asar.unpacked', 'scripts', 'check_affinity.ps1')
       : path.resolve(__dirname, '../../scripts/check_affinity.ps1');
 
     try {
@@ -155,6 +155,7 @@ function createWindow() {
     frame: false, 
     kiosk: true, 
     alwaysOnTop: true,
+    icon: path.join(__dirname, '../../build/icon.ico'),
     webPreferences: {
       preload: path.join(__dirname, '../preload/preload.js'),
     },

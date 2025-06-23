@@ -71,13 +71,22 @@
     "productName": "Garura - Interview Client",
     "asar": true,
     "directories": {
-      "output": "release"
+      "output": "release",
+      "buildResources": "build" 
     },
     "files": [
       "out/**/*",
+      "scripts/**/*",
+      "build/**/*"
+    ],
+    "asarUnpack": [
       "scripts/**/*"
     ],
     "extraResources": [
+      {
+        "from": "build/icon.ico",
+        "to": "icon.ico"
+      },
       {
         "from": "scripts",
         "to": "scripts"
@@ -87,7 +96,17 @@
       "target": "nsis",
       "requestedExecutionLevel": "requireAdministrator",
       "signAndEditExecutable": false,
-      "signExts": null
+      "signExts": null,
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "installerHeaderIcon": "build/icon.ico",
+      "createDesktopShortcut": true,
+      "shortcutName": "Garura",
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
     },
     "mac": {
       "target": "dmg"
