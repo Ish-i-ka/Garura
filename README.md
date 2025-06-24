@@ -41,7 +41,7 @@ Garuda tackles this problem head-on with an **asymmetric client-server architect
 
 This model allows us to enforce system-level security measures that are simply impossible in a browser-based environment, creating a controlled and fair testing ground where a candidate's genuine skills can be accurately assessed.
 
-![Garuda Banner](https://raw.githubusercontent.com/Team-ALTF4/Garura/main/Banner.png) 
+![Garuda Banner](https://raw.githubusercontent.com/TheCurryGuy/Garura/main/Banner.png) 
 
 ## Core Features
 
