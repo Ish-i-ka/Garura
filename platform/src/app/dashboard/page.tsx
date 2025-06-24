@@ -651,7 +651,7 @@ export default function DashboardPage() {
                   <Bird className="h-6 w-6 text-black" />
                 </div>
                 <h1 className="text-2xl font-bold text-white">
-                  <span className="text-cyan-400">GARUDA</span>
+                  <span className="text-cyan-400">GARURA</span>
                 </h1>
               </div>
               <Avatar className="h-10 w-10 border-2 border-cyan-500/30">
