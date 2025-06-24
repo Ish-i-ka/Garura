@@ -11,8 +11,8 @@ const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL'];
 // --- Configuration ---
 const SERVER_URL = 'https://garuraweb.onrender.com'; 
 const FLAGGED_APPS = [
-  'discord.exe', 'anydesk.exe', 'teamviewer.exe', 
-  'slack.exe', 'skype.exe', 'zoom.exe', 'mstsc.exe'
+  'discord.exe', 'slack.exe', 'skype.exe', 'zoom.exe', 'telegram.exe', 'whatsapp.exe', 'signal.exe', 'teams.exe', 'wechat.exe', 'viber.exe', 'anydesk.exe', 'teamviewer.exe', 'mstsc.exe', 'splashtop.exe', 'ultravnc.exe', 'chrome_remote_desktop.exe', 'logmein.exe', 'remotepc.exe', 'vmware.exe', 'vmplayer.exe', 'virtualbox.exe', 'vboxheadless.exe', 'bluestacks.exe', 'nox.exe', 'genymotion.exe', 'ldplayer.exe', 'obs64.exe', 'obs32.exe', 'bandicam.exe', 'camtasia.exe', 'xsplit.exe', 'screencastify.exe',
+  'screenrec.exe', 'apowersoft-screen-recorder.exe', 'autohotkey.exe', 'macrorecorder.exe', 'phraseexpress.exe', 'copyq.exe', 'tinytask.exe', 'chrome.exe', 'firefox.exe', 'msedge.exe', 'opera.exe', 'brave.exe', 'code.exe', 'pycharm64.exe', 'webstorm64.exe', 'sublime_text.exe', 'filezilla.exe', 'winscp.exe', 'dropbox.exe', 'googledrive.exe', 'onedrive.exe', 'wireshark.exe', 'processhacker.exe', 'cheatengine.exe', 'keylogger.exe', 'cluely.exe', 'interviewcoder.exe'
 ];
 const PROCESS_LOG_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
 
@@ -20,6 +20,7 @@ const PROCESS_LOG_INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
 let win: BrowserWindow | null = null;
 let socket: Socket | null = null;
 let processLogIntervalId: NodeJS.Timeout | null = null;
+let periodicScanIntervalId: NodeJS.Timeout | null = null;
 let ctrlPressCount = 0;
 let currentRoomCode: string | null = null;
 let securityCleanup: (() => void) | null = null; // For security monitoring cleanup
@@ -83,6 +84,26 @@ const startProcessLogging = (roomCode: string) => {
   };
   log();
   processLogIntervalId = setInterval(log, PROCESS_LOG_INTERVAL_MS);
+};
+
+
+const startPeriodicSecurityScans = (roomCode: string) => {
+  console.log('Starting periodic Display Affinity scans for room:', roomCode);
+  const runScan = async () => {
+    console.log(`[${new Date().toLocaleTimeString()}] Running periodic display affinity scan...`);
+    if (await checkDisplayAffinity()) {
+      const reason = 'Threat Detected Mid-Interview: A window with screen capture protection was launched.';
+      console.error(reason);
+      socket?.emit('security-alert', roomCode, { type: 'CRITICAL THREAT', message: reason });
+      // Clean up the timer before quitting
+      if (periodicScanIntervalId) clearInterval(periodicScanIntervalId);
+      setTimeout(() => forceQuit(), 500);
+    } else {
+      console.log('Periodic scan passed.');
+    }
+  };
+  // We use the same interval as the process logging.
+  periodicScanIntervalId = setInterval(runScan, PROCESS_LOG_INTERVAL_MS);
 };
 
 // --- Updated Security Monitoring ---
@@ -239,6 +260,7 @@ function initializeIpcHandlers() {
       console.log('Socket.IO connected to server.');
       socket?.emit('join-room', roomCode, `interviewee-${socket.id}`);
       startProcessLogging(roomCode);
+      startPeriodicSecurityScans(roomCode);
       
       if (win) {
         // Store cleanup function when starting monitoring
@@ -270,6 +292,10 @@ function initializeIpcHandlers() {
     if (processLogIntervalId) {
       clearInterval(processLogIntervalId);
       processLogIntervalId = null;
+    }
+    if (periodicScanIntervalId) {
+      clearInterval(periodicScanIntervalId);
+      periodicScanIntervalId = null;
     }
   });
   
@@ -303,6 +329,10 @@ app.on('will-quit', () => {
   if (processLogIntervalId) {
     clearInterval(processLogIntervalId);
     processLogIntervalId = null;
+  }
+  if (periodicScanIntervalId) {
+      clearInterval(periodicScanIntervalId);
+      periodicScanIntervalId = null;
   }
 });
 
